@@ -1,0 +1,82 @@
+---
+title: 'Getting Started'
+output: html_notebook
+---
+
+# US Cancer Facilities & Providers map
+
+## Accessing Data
+
+```{r setup}
+# library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(leaflet)
+library(readr)
+```
+
+
+Pull US Cancer Facilities & Providers map data by state...
+
+```{r pull-data}
+# readr
+state_facilities_providers <- read_csv("us_facilities_and_providers_11-02-2023.csv")
+
+class(state_facilities_providers)
+
+#View(state_facilities_providers )
+
+state_facilities_providers 
+
+```
+
+Let's now subset it for empty Lat & Long
+```{r}
+
+
+final_state_facilities_providers  <- state_facilities_providers  %>%
+  filter(latitude != "" )%>% 
+  select('Type','Name', 'Address', 'State',  'Phone_number', 'Notes', 'latitude', 'longitude', 'FIPS')
+
+
+final_state_facilities_providers 
+
+```
+
+
+## Publish Pin
+```{r}
+# remotes::install_github("rstudio/pins")
+library(pins)
+
+# depends on CONNECT_SERVER and CONNECT_API_KEY variable
+# https://colorado.posit.co/rsc/ShinyDeployWorkshop/ShinyRSCWorkshop.html#13
+
+board <- board_register_rsconnect()
+
+board %>% pin_write(final_state_facilities_providers , "final_state_facilities_providers", type = "csv")
+```
+
+Let's now subset it for VA MD DC
+```{r}
+
+
+VA_MD_DC_state_facilities_providers <- state_facilities_providers %>%
+  filter(State=='VA' | State=='MD' | State== 'DC' )%>% 
+  select('Type','Name', 'Address', 'State',  'Phone_number', 'Notes', 'latitude', 'longitude', 'FIPS')
+
+VA_MD_DC_state_facilities_providers
+
+
+```
+
+## Leaflet
+
+
+```{r}
+leaflet() %>% addTiles() %>% setView(-77.436546, 37.543152, zoom = 12) %>% 
+              
+addCircleMarkers(data = VA_MD_DC_state_facilities_providers , lat = ~ latitude, lng = ~ longitude, popup = VA_MD_DC_state_facilities_providers$Notes) %>%
+  addPopups(-77.436546, 37.543152, 'the <b> spot</b>')
+
+```
