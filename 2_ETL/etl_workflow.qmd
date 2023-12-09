@@ -52,7 +52,7 @@ library(pins)
 # depends on CONNECT_SERVER and CONNECT_API_KEY variable
 # https://colorado.posit.co/rsc/ShinyDeployWorkshop/ShinyRSCWorkshop.html#13
 
-board <- board_register_rsconnect()
+board <- board_connect()
 
 board %>% pin_write(final_state_facilities_providers , "final_state_facilities_providers", type = "csv")
 ```
